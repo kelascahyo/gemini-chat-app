@@ -14,8 +14,8 @@ except Exception as e:
     st.stop()
 
 # --- MODEL SELECTION ---
-# Using 'gemini-1.5-flash' for speed and reliability
-model = genai.GenerativeModel('gemini-1.5-flash')
+# Using 'gemini-2.5-flash' for speed and reliability
+model = genai.GenerativeModel('gemini-2.5-flash')
 
 # Initialize chat history
 if "messages" not in st.session_state:
