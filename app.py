@@ -6,7 +6,6 @@ st.set_page_config(page_title="My AI Assistant", page_icon="🧠", layout="cente
 st.title("Custom AI Chatbot")
 
 # --- LOAD SECRET API KEY ---
-# This looks for "GEMINI_API_KEY" in your Streamlit Cloud Secrets settings
 try:
     api_key = st.secrets["GEMINI_API_KEY"]
     genai.configure(api_key=api_key)
@@ -14,10 +13,11 @@ except Exception as e:
     st.error("Missing API Key! Please add 'GEMINI_API_KEY' to your Streamlit Secrets.")
     st.stop()
 
-# Initialize the Gemini Model
-model = genai.GenerativeModel('gemini-pro')
+# --- MODEL SELECTION ---
+# Using 'gemini-1.5-flash' for speed and reliability
+model = genai.GenerativeModel('gemini-1.5-flash')
 
-# --- CHAT HISTORY LOGIC ---
+# Initialize chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -28,27 +28,25 @@ for message in st.session_state.messages:
 
 # --- CHAT INPUT ---
 if prompt := st.chat_input("How can I help you today?"):
-    # User message
     st.chat_message("user").markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    # AI Response
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         
-        # Prepare history for Gemini (converts 'assistant' label to 'model')
+        # Format history for Gemini API
         history = [
             {"role": "user" if m["role"] == "user" else "model", "parts": [m["content"]]} 
             for m in st.session_state.messages[:-1]
         ]
         
         try:
+            # Start chat session with history
             chat = model.start_chat(history=history)
             response = chat.send_message(prompt)
             full_response = response.text
-            message_placeholder.markdown(full_response)
             
-            # Add to history
+            message_placeholder.markdown(full_response)
             st.session_state.messages.append({"role": "assistant", "content": full_response})
         except Exception as e:
             st.error(f"An error occurred: {e}")
